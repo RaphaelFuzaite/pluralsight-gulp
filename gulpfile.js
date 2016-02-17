@@ -3,6 +3,8 @@ var args = require('yargs').argv;
 var browserSync = require('browser-sync');
 var config = require('./gulp.config')();
 var del = require('del');
+var path = require('path');
+var _ = require('lodash');
 var $ = require('gulp-load-plugins')({ lazy: true });
 var port = process.env.PORT || config.defaultPort;
 
@@ -109,6 +111,40 @@ function serve(isDev) {
 		});
 }
 
+function startTest(singleRun, done) {
+	var karma = require('karma').server;
+	var excludeFiles = [];
+	var serverSpecs = config.serverIntegrationSpecs;
+	
+	excludeFiles = serverSpecs;
+	
+	karma.start({
+		configFile: __dirname + '/karma.conf.js',
+		exclude: excludeFiles,
+		singleRun: !!singleRun
+	}, karmaCompleted);
+	
+	function karmaCompleted(karmaResult) {
+		log('karma completed!');
+		if (karmaResult === 1) {
+			done('karma: tests failed with code: ' + karmaResult);
+		} else {
+			done();
+		 }
+	}
+}
+
+function notify(options) {
+	var notifier = require('node-notifier');
+	var notifyOptions = {
+		sound: 'Bottle',
+		contentImage: path.join(__dirname, 'gulp.png'),
+		icon: path.join(__dirname, 'gulp.png')	
+	};
+	_.assing(notifyOptions, options);
+	notifier.notify(notifyOptions);
+}
+
 gulp.task('help', $.taskListing);
 gulp.task('default', ['help']);
 
@@ -162,7 +198,7 @@ gulp.task('templatecache', ['clean-code'], function () {
 			config.templateCache.file,
 			config.templateCache.options
 		))
-		.pipe(gulp.dest(config.temp))
+		.pipe(gulp.dest(config.temp));
 });
 
 gulp.task('less-watcher', function() {
@@ -220,7 +256,20 @@ gulp.task('inject', ['wiredep', 'styles'], function () {
 		.pipe(gulp.dest(config.client));
 });
 
-gulp.task('optimize', ['inject'], function () {
+gulp.task('build', ['optimize', 'images', 'fonts'], function () {
+	log('Building everything....');
+	
+	var msg = {
+		title: 'gulp build',
+		subtitle: 'Deployed to the build folder',
+		message: 'Running `gulp serve-build`'
+	};
+	del(config.temp);
+	log(msg);
+	notify(msg);
+});
+
+gulp.task('optimize', ['inject', 'test'], function () {
 	log('Optimizing the javascript, css, html');
 
 	var assets = $.useref.assets({ searchPath: './' });
@@ -291,10 +340,18 @@ gulp.task('bump', function () {
 	
 });
 
-gulp.task('serve-build', ['optimize'], function () {
+gulp.task('serve-build', ['build'], function () {
 	serve(false);
 });
 
 gulp.task('serve-dev', ['inject'], function () {
 	serve(true);
+});
+
+gulp.task('test', ['vet', 'templatecache'], function (done) {
+	startTest(true, done);
+});
+
+gulp.task('autotest', ['vet', 'templatecache'], function (done) {
+	startTest(false, done);
 });
