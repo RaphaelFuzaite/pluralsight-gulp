@@ -3,6 +3,7 @@ module.exports = function() {
 	var clientApp = client + 'app/';
 	var server = './src/server/';
 	var temp = './.tmp/';
+	var root = './';
 	
 	var config = {
 		
@@ -29,6 +30,7 @@ module.exports = function() {
 		less: client + 'styles/styles.less',
 		temp: temp,
 		server: server,
+		root: root,
 		/**
 		 * Browser sync
 		 */
@@ -52,6 +54,14 @@ module.exports = function() {
 			directory: './bower_components',
 			ignorePath: '../..'
 		},
+		
+		/**
+		 * Package file locations
+		 */
+		packages: [
+			'./package.json',
+			'./bower.json'
+		],
 		
 		/**
 		 * Optimized files
