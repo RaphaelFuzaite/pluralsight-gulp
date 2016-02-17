@@ -71,3 +71,6 @@ ehthumbs.db
 Icon?
 Thumbs.db
 
+# Gulp datafiles #
+######################
+.tmp/
