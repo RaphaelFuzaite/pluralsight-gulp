@@ -54,6 +54,15 @@ module.exports = function() {
 		},
 		
 		/**
+		 * Optimized files
+		 */
+		optimized: {
+			app: 'app.js',
+			lib: 'lib.js'	
+		},
+		
+		
+		/**
 		 * Node settings
 		 */
 		defaultPort: 7203,

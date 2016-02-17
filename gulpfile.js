@@ -226,7 +226,8 @@ gulp.task('optimize', ['inject'], function () {
 	var assets = $.useref({ searchPath: './' });
 	var templateCache = config.temp + config.templateCache.file;
 	var cssFilter = $.filter('**/*.css', { restore: true });
-	var jsFilter = $.filter('**/*.js', { restore: true });
+	var jsLibFilter = $.filter('**/' + config.optimized.lib, { restore: true });
+	var jsAppFilter = $.filter('**/' + config.optimized.app, { restore: true });
 		
 	return gulp
 		.src(config.index)
@@ -235,12 +236,20 @@ gulp.task('optimize', ['inject'], function () {
 			starttag: '<!-- inject:templates.js -->'
 		})))
 		.pipe(assets)
+		
 		.pipe(cssFilter)
 		.pipe($.csso())
 		.pipe(cssFilter.restore)
-		.pipe(jsFilter)
+		
+		.pipe(jsLibFilter)
 		.pipe($.uglify())
-		.pipe(jsFilter.restore)
+		.pipe(jsLibFilter.restore)
+		
+		.pipe(jsAppFilter)
+		.pipe($.ngAnnotate({add: true}))
+		.pipe($.uglify())
+		.pipe(jsAppFilter.restore)
+		
 		.pipe(gulp.dest(config.build));
 });
 
