@@ -3,6 +3,7 @@ module.exports = function() {
 	var clientApp = client + 'app/';
 	var report = './report/';
 	var server = './src/server/';
+	var specRunnerFile = 'specs.html';
 	var temp = './.tmp/';
 	var root = './';
 	var wiredep = require('wiredep');
@@ -74,6 +75,19 @@ module.exports = function() {
 			app: 'app.js',
 			lib: 'lib.js'	
 		},
+		
+		/**
+		 * Spec runner files
+		 */
+		specRunner: client + specRunnerFile,
+		specRunnerFile: specRunnerFile,
+		testlibraries: [
+			'node_modules/mocha/mocha.js',
+			'node_modules/chai/chai.js',
+			'node_modules/mocha-clean/index.js',
+			'node_modules/sinon-chai/lib/sinon-chai.js'
+		],
+		specs: [clientApp + '**/*.spec.js'],
 		
 		/**
 		 * Karma and testing settings
